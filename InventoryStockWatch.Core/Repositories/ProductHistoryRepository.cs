@@ -29,5 +29,11 @@ namespace InventoryStockWatch.Core.Repositories
             await Task.CompletedTask;
             return _dbContext.ProductHistory.Query("select * from ProductHistory where Url = ?", new[] { productUrl }).Any();
         }
+
+        public async Task<IEnumerable<ProductHistory>> GetProductHistoryAsync(string productUrl)
+        {
+            await Task.CompletedTask;
+            return _dbContext.ProductHistory.Query("select * from ProductHistory order by CheckedAt desc");
+        }
     }
 }

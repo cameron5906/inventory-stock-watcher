@@ -1,10 +1,9 @@
 using InventoryStockWatch.Core.Converters;
-using InventoryStockWatch.Core.Models.Selectors;
 using InventoryStockWatch.Core.Models.Selectors.Price;
 using InventoryStockWatch.Core.Models.Selectors.Stock;
 using Newtonsoft.Json;
 
-namespace InventoryStockWatch.Core.Models
+namespace InventoryStockWatch.Core.Models.Config
 {
     public class ProductSourceDescriptor
     {

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CsQuery;
-using InventoryStockWatch.Core.Models;
+using InventoryStockWatch.Core.Models.Config;
 using InventoryStockWatch.Core.Models.Selectors;
 using InventoryStockWatch.Core.Models.Selectors.Price;
 using InventoryStockWatch.Core.Models.Selectors.Stock;

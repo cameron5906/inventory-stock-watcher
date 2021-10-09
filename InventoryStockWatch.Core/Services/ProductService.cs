@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using InventoryStockWatch.Core.Context;
 using InventoryStockWatch.Core.Models;
+using InventoryStockWatch.Core.Models.Config;
 using InventoryStockWatch.Core.Models.Entities;
 using InventoryStockWatch.Core.Repositories;
 using InventoryStockWatch.Core.Services.Scrapers;
@@ -39,21 +41,31 @@ namespace InventoryStockWatch.Core.Services
                 SelectorContentType.Html => await _htmlScraper.GetPriceAsync(sourceDescriptor),
                 SelectorContentType.LinkedJson => await _linkedJsonScraper.GetPriceAsync(sourceDescriptor)
             };
-
-            await _productHistoryRepository.AddHistoryItemAsync(new ProductHistory
-            {
-                Url = sourceDescriptor.Url,
-                InStock = stockResult,
-                Price = priceResult ?? -1,
-                Title = sourceDescriptor.Title,
-                LastCheckedAt = DateTimeOffset.UtcNow
-            });
             
             return new ProductCheckResult
             {
                 InStock = stockResult,
                 Price = priceResult ?? -1
             };
+        }
+
+        public async Task<ProductHistory> GetLastProductCheckAsync(ProductSourceDescriptor sourceDescriptor)
+        {
+            var history = await _productHistoryRepository.GetProductHistoryAsync(sourceDescriptor.Url);
+
+            return history.FirstOrDefault();
+        }
+
+        public async Task SaveHistoryAsync(ProductSourceDescriptor sourceDescriptor, ProductCheckResult checkResult)
+        {
+            await _productHistoryRepository.AddHistoryItemAsync(new ProductHistory
+            {
+                Url = sourceDescriptor.Url,
+                InStock = checkResult.InStock,
+                Price = checkResult.Price,
+                Title = sourceDescriptor.Title,
+                CheckedAt = DateTimeOffset.UtcNow
+            });
         }
     }
 }

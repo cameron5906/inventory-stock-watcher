@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using InventoryStockWatch.Core.Models;
+using InventoryStockWatch.Core.Models.Config;
 
 namespace InventoryStockWatch.Core.Services.Scrapers
 {

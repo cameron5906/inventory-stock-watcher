@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using InventoryStockWatch.Core.Context;
+using InventoryStockWatch.Core.Interfaces.Repositories;
+using InventoryStockWatch.Core.Interfaces.Services;
 using InventoryStockWatch.Core.Models;
-using InventoryStockWatch.Core.Models.Selectors;
-using InventoryStockWatch.Core.Models.Selectors.Price;
-using InventoryStockWatch.Core.Models.Selectors.Stock;
+using InventoryStockWatch.Core.Models.Communication;
 using InventoryStockWatch.Core.Repositories;
+using InventoryStockWatch.Core.Repositories.Communication;
 using InventoryStockWatch.Core.Services;
 using InventoryStockWatch.Core.Services.Scrapers;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,8 @@ namespace InventoryStockWatch
             var host = CreateHostBuilder(args).Build();
             var ingestService = host.Services.GetRequiredService<IngestService>();
             var productService = host.Services.GetRequiredService<ProductService>();
+            var communicationService = host.Services.GetRequiredService<CommunicationService>();
+            var configurationService = host.Services.GetRequiredService<IConfigurationService>();
 
             var productDescriptors = await ingestService.GetAllProductsAsync();
 
@@ -28,10 +31,22 @@ namespace InventoryStockWatch
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Write($"Checking {productDescriptor.Title}... ");
+
                 var result = await productService.CheckProductAsync(productDescriptor);
+                var lastResult = await productService.GetLastProductCheckAsync(productDescriptor);
                 
                 if(result.InStock)
                 {
+                    if(lastResult is null || !lastResult.InStock)
+                    {
+                        await communicationService.SendMessageAsync(configurationService.GetAlertRecipient(), $"{productDescriptor.Title} is now in stock for ${result.Price}!", "Product now in stock");
+                    }
+
+                    if(lastResult is not null && lastResult.Price > result.Price)
+                    {
+                        await communicationService.SendMessageAsync(configurationService.GetAlertRecipient(), $"Price has dropped for {productDescriptor.Title} from ${lastResult.Price} to {result.Price}!", "Product price drop");
+                    }
+
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.Write($"In Stock ({result.Price})");
                 }
@@ -40,6 +55,8 @@ namespace InventoryStockWatch
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write("Out of Stock");
                 }
+
+                await productService.SaveHistoryAsync(productDescriptor, result);
             }
 
             Console.ForegroundColor = ConsoleColor.Green;
@@ -60,6 +77,10 @@ namespace InventoryStockWatch
                     services.AddSingleton<SQLiteDbContext, SQLiteDbContext>();
                     services.AddSingleton<IngestService, IngestService>();
                     services.AddSingleton<ProductHistoryRepository, ProductHistoryRepository>();
+                    services.AddSingleton<ICommunicationRepository<SMSMessage>, TwilioCommunicationRepository>();
+                    services.AddSingleton<ICommunicationRepository<Email>, EmailCommunicationRepository>();
+                    services.AddSingleton<CommunicationService, CommunicationService>();
+                    services.AddSingleton<IConfigurationService, EnvironmentConfigurationService>();
                 }).UseConsoleLifetime();
         }
     }

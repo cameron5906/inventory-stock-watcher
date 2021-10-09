@@ -39,9 +39,9 @@ namespace InventoryStockWatch.Core.Context
             _connection.Insert(record);
         }
 
-        public IEnumerable<T> Query(string query, object[] args)
+        public IEnumerable<T> Query(string query, object[] args = null)
         {
-            return _connection.Query<T>(query, args).AsEnumerable<T>();
+            return _connection.Query<T>(query, args ?? Array.Empty<object>()).AsEnumerable<T>();
         }
 
         public void Update(T record)

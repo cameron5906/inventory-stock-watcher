@@ -20,6 +20,6 @@ namespace InventoryStockWatch.Core.Models.Entities
 
         public double Price { get; set; }
 
-        public DateTimeOffset LastCheckedAt { get; set; }
+        public DateTimeOffset CheckedAt { get; set; }
     }
 }

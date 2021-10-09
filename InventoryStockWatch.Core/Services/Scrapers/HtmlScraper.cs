@@ -49,7 +49,11 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             if (!element.Any())
                 throw new DataMisalignedException("Incorrect stock selector");
 
-            return Regex.IsMatch(element.Text(), htmlSelector.RegexTest);
+            var actionableText = string.IsNullOrEmpty(htmlSelector.Property)
+                ? element.Text()
+                : element.Attr(htmlSelector.Property);
+
+            return Regex.IsMatch(actionableText, htmlSelector.RegexTest);
         }
     }
 }

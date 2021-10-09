@@ -33,7 +33,7 @@ namespace InventoryStockWatch.Core.Repositories
         public async Task<IEnumerable<ProductHistory>> GetProductHistoryAsync(string productUrl)
         {
             await Task.CompletedTask;
-            return _dbContext.ProductHistory.Query("select * from ProductHistory order by CheckedAt desc");
+            return _dbContext.ProductHistory.Query("select * from ProductHistory where Url = ? order by CheckedAt desc", new[] { productUrl });
         }
     }
 }

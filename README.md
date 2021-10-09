@@ -37,3 +37,19 @@ Simply create a new JSON file somewhere on your computer using the schema below.
   }
 ]
 ```
+
+## Schema Components
+- `Url` - The URL of the product
+- `PriceSelector` - An object that describes how to find the price on the page
+- `StockSelector` - An object that describes where to find the availability of a product (using RegEx to test the value)
+- `Title` - A reference name for the product
+
+### Selectors
+Valid types are `Html`, `Json`, `LinkedJson`
+
+#### HTML Selector
+- `Selector` - A DOM query
+- `Property` - Optional property to refer to one of the element's attributes. If not provided, text is used
+
+#### JSON Selector
+- `PathTemplate` - A JSON path (i.e `offers.availability` or `offers[0].availability`)

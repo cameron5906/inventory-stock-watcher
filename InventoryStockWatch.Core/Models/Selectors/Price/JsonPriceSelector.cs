@@ -1,4 +1,6 @@
-namespace InventoryStockWatch.Core.Models.Selectors
+using InventoryStockWatch.Core.Models.Selectors.Stock;
+
+namespace InventoryStockWatch.Core.Models.Selectors.Price
 {
     public class JsonPriceSelector : IPriceSelector
     {

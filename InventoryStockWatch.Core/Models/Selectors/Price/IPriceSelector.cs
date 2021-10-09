@@ -1,4 +1,4 @@
-namespace InventoryStockWatch.Core.Models.Selectors
+namespace InventoryStockWatch.Core.Models.Selectors.Price
 {
     public interface IPriceSelector
     {

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CsQuery;
 using InventoryStockWatch.Core.Models;
 using InventoryStockWatch.Core.Models.Selectors;
+using InventoryStockWatch.Core.Models.Selectors.Price;
+using InventoryStockWatch.Core.Models.Selectors.Stock;
 using InventoryStockWatch.Core.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,7 +15,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
 {
     public class JsonScraper : IScraper
     {
-        public async Task<double?> GetPriceAsync(SourceDescriptor sourceDescriptor)
+        public async Task<double?> GetPriceAsync(ProductSourceDescriptor sourceDescriptor)
         {
             var priceSelector = sourceDescriptor.PriceSelector as JsonPriceSelector;
             
@@ -36,7 +38,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             return null;
         }
 
-        public async Task<bool> GetIsInStockAsync(SourceDescriptor sourceDescriptor)
+        public async Task<bool> GetIsInStockAsync(ProductSourceDescriptor sourceDescriptor)
         {
             /*var stockSelector = sourceDescriptor.StockSelector as JsonStockSelector;
             

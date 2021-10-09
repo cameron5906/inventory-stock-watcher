@@ -5,7 +5,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
 {
     public interface IScraper
     {
-        Task<double?> GetPriceAsync(SourceDescriptor sourceDescriptor);
-        Task<bool> GetIsInStockAsync(SourceDescriptor sourceDescriptor);
+        Task<double?> GetPriceAsync(ProductSourceDescriptor sourceDescriptor);
+        Task<bool> GetIsInStockAsync(ProductSourceDescriptor sourceDescriptor);
     }
 }

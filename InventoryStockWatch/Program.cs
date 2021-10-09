@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using InventoryStockWatch.Core.Context;
 using InventoryStockWatch.Core.Models;
 using InventoryStockWatch.Core.Models.Selectors;
+using InventoryStockWatch.Core.Models.Selectors.Price;
+using InventoryStockWatch.Core.Models.Selectors.Stock;
+using InventoryStockWatch.Core.Repositories;
 using InventoryStockWatch.Core.Services;
 using InventoryStockWatch.Core.Services.Scrapers;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,24 +18,34 @@ namespace InventoryStockWatch
         static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
+            var ingestService = host.Services.GetRequiredService<IngestService>();
             var productService = host.Services.GetRequiredService<ProductService>();
 
-            var result = await productService.CheckProduct(new SourceDescriptor()
+            var productDescriptors = await ingestService.GetAllProductsAsync();
+
+            foreach(var productDescriptor in productDescriptors)
             {
-                Url = "https://www.amazon.com/Nintendo-Switch-Neon-Blue-Joy%E2%80%91/dp/B07VGRJDFY/ref=sr_1_1?dchild=1&keywords=nintendo+switch&qid=1633722143&refinements=p_n_availability%3A2661601011&rnid=2661599011&sr=8-1",
-                Type = SourceType.Webpage,
-                PriceSelector = new HtmlPriceSelector()
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"Checking {productDescriptor.Title}... ");
+                var result = await productService.CheckProductAsync(productDescriptor);
+                
+                if(result.InStock)
                 {
-                    Selector = "span#price_inside_buybox"
-                },
-                StockSelector = new HtmlStockSelector()
-                {
-                    Selector = "body",
-                    RegexTest = "^(?!.*(In stock soon|Out of stock).*$)"
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write($"In Stock ({result.Price})");
                 }
-            });
-            
-            Console.WriteLine(result);
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("Out of Stock");
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine();
+            Console.WriteLine("Done");
+            Console.ReadLine();
         }
 
         static IHostBuilder CreateHostBuilder(string[] args)
@@ -43,6 +57,9 @@ namespace InventoryStockWatch
                     services.AddSingleton<JsonScraper, JsonScraper>();
                     services.AddSingleton<LinkedJsonScraper, LinkedJsonScraper>();
                     services.AddSingleton<ProductService, ProductService>();
+                    services.AddSingleton<SQLiteDbContext, SQLiteDbContext>();
+                    services.AddSingleton<IngestService, IngestService>();
+                    services.AddSingleton<ProductHistoryRepository, ProductHistoryRepository>();
                 }).UseConsoleLifetime();
         }
     }

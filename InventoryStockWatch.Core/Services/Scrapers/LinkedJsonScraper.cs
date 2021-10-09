@@ -1,9 +1,12 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CsQuery;
 using InventoryStockWatch.Core.Models;
 using InventoryStockWatch.Core.Models.Selectors;
+using InventoryStockWatch.Core.Models.Selectors.Price;
+using InventoryStockWatch.Core.Models.Selectors.Stock;
 using InventoryStockWatch.Core.Utils;
 using Newtonsoft.Json.Linq;
 
@@ -11,7 +14,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
 {
     public class LinkedJsonScraper : IScraper
     {
-        public async Task<double?> GetPriceAsync(SourceDescriptor sourceDescriptor)
+        public async Task<double?> GetPriceAsync(ProductSourceDescriptor sourceDescriptor)
         {
             var priceSelector = sourceDescriptor.PriceSelector as LinkedJsonPriceSelector;
             
@@ -21,7 +24,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             var element = query.Find("script[type='application/ld+json']");
 
             if (!element.Any())
-                return null;
+                throw new DataMisalignedException("Incorrect price selector");
 
             var json = element.First().Text();
             
@@ -30,7 +33,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             return JsonUtil.GetValueFromObjectPath<double>(jObject, priceSelector.PathTemplate);
         }
 
-        public async Task<bool> GetIsInStockAsync(SourceDescriptor sourceDescriptor)
+        public async Task<bool> GetIsInStockAsync(ProductSourceDescriptor sourceDescriptor)
         {
             var stockSelector = sourceDescriptor.StockSelector as LinkedJsonStockSelector;
             
@@ -40,7 +43,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             var element = query.Find("script[type='application/ld+json']");
 
             if (!element.Any())
-                return false;
+                throw new DataMisalignedException("Incorrect stock selector");
 
             var json = element.First().Text();
             

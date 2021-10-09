@@ -1,16 +1,19 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CsQuery;
 using InventoryStockWatch.Core.Models;
 using InventoryStockWatch.Core.Models.Selectors;
+using InventoryStockWatch.Core.Models.Selectors.Price;
+using InventoryStockWatch.Core.Models.Selectors.Stock;
 using InventoryStockWatch.Core.Utils;
 
 namespace InventoryStockWatch.Core.Services.Scrapers
 {
     public class HtmlScraper : IScraper
     {
-        public async Task<double?> GetPriceAsync(SourceDescriptor sourceDescriptor)
+        public async Task<double?> GetPriceAsync(ProductSourceDescriptor sourceDescriptor)
         {
             var htmlSelector = sourceDescriptor.PriceSelector as HtmlPriceSelector;
             
@@ -20,7 +23,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             var element = query.Find(htmlSelector.Selector);
 
             if (!element.Any())
-                return null;
+                throw new DataMisalignedException("Incorrect price selector");
 
             var actionableText = string.IsNullOrEmpty(htmlSelector.Property)
                 ? element.Text()
@@ -34,7 +37,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             return price;
         }
 
-        public async Task<bool> GetIsInStockAsync(SourceDescriptor sourceDescriptor)
+        public async Task<bool> GetIsInStockAsync(ProductSourceDescriptor sourceDescriptor)
         {
             var htmlSelector = sourceDescriptor.StockSelector as HtmlStockSelector;
             
@@ -44,7 +47,7 @@ namespace InventoryStockWatch.Core.Services.Scrapers
             var element = query.Find(htmlSelector.Selector);
 
             if (!element.Any())
-                return false;
+                throw new DataMisalignedException("Incorrect stock selector");
 
             return Regex.IsMatch(element.Text(), htmlSelector.RegexTest);
         }
